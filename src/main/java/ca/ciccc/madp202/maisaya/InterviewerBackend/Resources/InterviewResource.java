@@ -37,7 +37,6 @@ public class InterviewResource {
     		userList = is.deserializationFromUserFile();
 	    User user = is.createUserForFile(urm, userList);
 	    is.selializationToUserFile(user, userList);
-		System.out.println("userlist更新後の数"+userList.size());
 		for(User user1: userList) {
 			System.out.println(user.getUsername());
 			System.out.println(user.getPassword());
@@ -51,6 +50,10 @@ public class InterviewResource {
     public CredentialResponseModel createCredentialResponseModel(CredentialRequestModel crm) {
     		userList = is.deserializationFromUserFile();
     		System.out.println("userlistの長さは"+userList.size());
+    		for(int i=0; i<userList.size(); i++) {
+    			System.out.println("userlistのusername: "+userList.get(i).getUsername());
+    			System.out.println("userlistのpassword: "+userList.get(i).getPassword());
+    		}
 		CredentialResponseModel urm2 = is.userCheck(crm, userList);
 		
     		return urm2;    	
@@ -60,6 +63,7 @@ public class InterviewResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)    
     public InterviewSelectionResponseModel createInterviewSelectionResponseModel(@PathParam("topic") InterviewType topic) {
+    	System.out.println("aaa");
 	  return is.passQuestions(topic);  	
     }
 
@@ -78,8 +82,8 @@ public class InterviewResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON) 
     public HistoryResponseModel createHistoryResponseModel(@PathParam("userId") int userId) {
-    		ArrayList<HistoryEntity> historyRecord = is.deserializationFromResultsFile(userId);		
-
+    		ArrayList<HistoryEntity> historyRecord = is.deserializationFromResultsFile(userId);
+    		
     		return new HistoryResponseModel(historyRecord);
     }
     

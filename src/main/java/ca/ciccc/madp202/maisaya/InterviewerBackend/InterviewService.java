@@ -1,5 +1,6 @@
 package ca.ciccc.madp202.maisaya.InterviewerBackend;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,6 +41,8 @@ public class InterviewService {
 /* Login */
 	public CredentialResponseModel userCheck(CredentialRequestModel crm, ArrayList<User> userList) {
 		for(int i = 0; i<userList.size(); i++) {
+			System.out.println("inputのusernameは"+crm.getUsername());
+			System.out.println("listのusernameは"+userList.get(i).getUsername());
 			if(crm.getUsername().equals(userList.get(i).getUsername())) {
 				if(crm.getPassword().equals(userList.get(i).getPassword())) {
 					return new CredentialResponseModel(userList.get(i).getFirstname(),userList.get(i).getLastname(), userList.get(i).getUserId(),userList.get(i).getUsername(),userList.get(i).getJoin(), userList.get(i).getStatus(), userList.get(i).getAuthToken());
@@ -56,7 +59,7 @@ public class InterviewService {
 		userList.add(user);
        try{
     	     // serialize data object to a file
-         FileOutputStream fos= new FileOutputStream("UsersFile");
+         FileOutputStream fos= new FileOutputStream("UsersFile3");
          ObjectOutputStream oos= new ObjectOutputStream(fos);
          oos.writeObject(userList);
          oos.close();
@@ -75,7 +78,7 @@ public class InterviewService {
 		ArrayList<User> userList = new ArrayList<>();
 	    
 		try{
-	        FileInputStream fis = new FileInputStream("UsersFile1");
+	        FileInputStream fis = new FileInputStream("UsersFile3");
 	        ObjectInputStream ois = new ObjectInputStream(fis);
 	        userList = (ArrayList) ois.readObject();
 	        ois.close();
@@ -166,6 +169,7 @@ public class InterviewService {
 		}
 		for(int i = 0; i < acrm.getAnswers().size(); i++) {
 			if(acrm.getAnswers().get(i).getResponse().equals(as.getAnswerList()[i])) { //correct
+				System.out.println("答えの長さは"+acrm.getAnswers().size());
 				correctAnswer++;
 			}
 			else if(acrm.getAnswers().get(i).getResponse().equals("S")){ //skipped
@@ -178,30 +182,15 @@ public class InterviewService {
 		score = correctAnswer*5;
 		
 	//for android project
+		Calendar date;
 		if(acrm.getDate()==null) {
-			Calendar date = Calendar.getInstance();
-		}	
+			date = Calendar.getInstance();
+		}
+		else date = acrm.getDate();
 		
-		AnswerCollectionResponseModel acrm2 = new AnswerCollectionResponseModel(acrm.getInterviewId(), 20, correctAnswer, wrongAnswer, skippedAnswer, acrm.getTopic(), 20, score, acrm.getDate(), 1);
+		AnswerCollectionResponseModel acrm2 = new AnswerCollectionResponseModel(acrm.getInterviewId(), 20, correctAnswer, wrongAnswer, skippedAnswer, acrm.getTopic(), 20, score, date, 1);
 		return acrm2;
 	}
-	
-	public void selializationToResultsFile(int userId, HistoryEntity historyEntity, ArrayList<HistoryEntity> historyRecord) {
-		   historyRecord.add(historyEntity);
-	       try{
-	    	     // serialize data object to a file
-	         FileOutputStream fos= new FileOutputStream("ResultsFile"+userId);
-	         ObjectOutputStream oos= new ObjectOutputStream(fos);
-	         oos.writeObject(historyRecord);
-	         oos.close();
-	         fos.close();
-	         
-	       	}catch(IOException ioe){
-	            ioe.printStackTrace();
-	        }
-			
-	}
-
 	
 /* History */
 	public HistoryEntity createHistoryEntity(AnswerCollectionResponseModel acrm) {
@@ -224,14 +213,24 @@ public class InterviewService {
 ////		SimpleDateFormat dateFormatter = new SimpleDateFormat("dd, MMMM yyyy");
 //		String dateS = dateFormatter.format(acrm.getDate().getTime());
 		
-		
-		
-		
 		String score = acrm.getScore()+"/100";
 		return new HistoryEntity(topic, date, score);
 	}
 	
-
+	public void selializationToResultsFile(int userId, HistoryEntity historyEntity, ArrayList<HistoryEntity> historyRecord) {
+		   historyRecord.add(historyEntity);
+	       try{
+	    	     // serialize data object to a file
+	         FileOutputStream fos= new FileOutputStream("ResultsFile"+userId);
+	         ObjectOutputStream oos= new ObjectOutputStream(fos);
+	         oos.writeObject(historyRecord);
+	         oos.close();
+	         fos.close();
+	         
+	       	}catch(IOException ioe){
+	            ioe.printStackTrace();
+	        }	
+	}
 	
 	public ArrayList<HistoryEntity> deserializationFromResultsFile(int userId) {
 		ArrayList<HistoryEntity> historyRecord = new ArrayList<>();
@@ -240,6 +239,7 @@ public class InterviewService {
 	        FileInputStream fis = new FileInputStream("ResultsFile"+userId);
 	        ObjectInputStream ois = new ObjectInputStream(fis);
 	        historyRecord = (ArrayList) ois.readObject();
+	       
 	        ois.close();
 	        fis.close();
 	        return historyRecord;
